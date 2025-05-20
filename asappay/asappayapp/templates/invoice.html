@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+    <div class="invoice-container">
+        <div class="header">
+            <div class="company-details">
+                <h1>ASAPpay</h1>
+                <p>302, Shivam apartment<br>borivali west 400092<br>Email: asappay@gmail.com<br>Phone: +91 7977434944</p>
+            </div>
+            <div>
+                <h2>Invoice</h2>
+                <p>Invoice #: {{transaction.transactionid}}<br>Date: {{transaction.transactioncreatedate}}<br>Due Date: {{transaction.transactionduedate}}</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Client Details</h2>
+            <table class="details">
+                <tr>
+                    <td><strong>Client Name:</strong> {{account.accountname}}</td>
+                    <td><strong>Address:</strong> {{account.address}} {{account.city}} {{account.country}} {{account.pincode}}</td>
+                </tr>
+                <tr>
+                    <td><strong>Email:</strong> {{account.accountemailid}}</td>
+                    <td><strong>Phone:</strong> {{account.accountphone}}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!--<div class="section">
+            <h2>Invoice Items</h2>
+            <table class="items">
+                <thead>
+                    <tr>
+                        <th>Description</th>
+                        <th>Quantity</th>
+                        <th>Unit Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Service/Product 1</td>
+                        <td>1</td>
+                        <td>$100.00</td>
+                        <td>$100.00</td>
+                    </tr>
+                    <tr>
+                        <td>Service/Product 2</td>
+                        <td>2</td>
+                        <td>$50.00</td>
+                        <td>$100.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>-->
+
+        <div class="total">
+            <strong>Total: ₹{{transaction.transactionamount}}</strong>
+        </div>
+        {% if transaction.transactionstatus != "paid" %}
+            <div class="payment-method-selector">
+                <label for="payment-method"><strong>Select Payment Method:</strong></label>
+                <select id="payment-method">
+                    <option value="razorpay">Razorpay</option>
+                </select>
+            </div>
+        
+            <div class="payment-section">            
+                <button id="rzp-button" class="payment-button">Pay Now</button>
+            </div>
+        {% else %}
+            <div class="payment-section">
+                <p><strong>Status:</strong> Paid</p>
+            </div>
+        {% endif %}
+
+        <div class="footer">
+            <p>Thank you for your business! Please contact us if you have any questions about this invoice.</p>
+        </div>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        document.getElementById('rzp-button').onclick = function (e) {
+            var options = {
+                "key": "{{ razorpay_key }}",
+                "amount": "{{ amount }}", // amount in paise
+                "currency": "INR",
+                "name": "ASAPpay",
+                "description": "Invoice Payment",
+                "handler": function (response) {
+                    // Send payment_id to backend for verification/processing
+                    fetch('/payment/', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            transaction_id: "{{ transaction.transactionid }}"
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.status === "success") {
+                            window.location.href = "/payment_success/" + data.transaction_id + "/";
+                        } else {
+                            alert("Payment failed: " + data.payment_status);
+                            window.location.href = "/payment_cancel/" + data.transaction_id + "/";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Payment error:", error);
+                        alert("Something went wrong.");
+                    });
+                },
+                "theme": {
+                    "color": "#3399cc"
+                }
+            };
+            var rzp1 = new Razorpay(options);
+            rzp1.open();
+            e.preventDefault();
+        }
+    </script>
+{% endblock %}

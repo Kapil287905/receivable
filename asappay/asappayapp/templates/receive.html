@@ -1,0 +1,124 @@
+{% extends 'baseinner.html' %}
+{% load static %}
+{% block body %}
+	<!-- dashboard inner -->
+	<div class="midde_cont">
+		<div class="container-fluid">
+			<div class="row column_title">
+				<div class="col-md-12">
+					<div class="page_title">
+						<h2>Receve transaction</h2>
+					</div>
+				</div>
+			</div>
+			<!-- row -->
+			<div class="row column1">
+				{% if messages %}
+					<div class="col-md-12 text-center mb-3" style="background-color:#008000; border-radius: 20px;">
+						{% for msg in messages %}
+						<div style="color: #ffffff;padding: 20px;">
+							{{ msg }}
+						</div>
+						{% endfor %}
+					</div>
+				{% endif %}
+				<div class="col-md-6">
+					<div class="white_shd full margin_bottom_30">
+						<div class="full graph_head">
+							<div class="heading1 margin_0">
+							<h2>create Transaction</h2>
+							</div>
+						</div>
+						<div class="full price_table padding_infor_info">
+							<div class="row">
+							<div class="col-lg-12">
+								<form class="custom-form validate-form" method="post" role="form" enctype="multipart/form-data">
+									{% csrf_token %}
+									<div class="wrap-input100 validate-input">
+										<select class="js-example-placeholder-single" id="accountSelect">
+											<option value=""></option>
+											{% for x in allaccount %}
+											<option value="{{x.accountname}}" data-email="{{ x.accountemailid }}" 
+											data-phone="{{ x.accountphone }}">{{x.accountname}}</option>
+											{% endfor %}
+										</select>														
+									</div>				
+
+									<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+										<input class="input100" id="InputEmail" name="email" type="email" placeholder="Enter Email"  aria-describedby="emailHelp" required>
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-envelope" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input" data-validate = "Valid phone is required: ex@abc.xyz">
+										<input class="input100" id="Inputphone" name="phone" type="tel" placeholder="Enter phone number" required>
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-phone" aria-hidden="true"></i>
+										</span>
+									</div>
+				
+									<div class="wrap-input100 validate-input">
+										<input class="input100" id="Inputamount" name="amount" type="number" placeholder="Amount" required>
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-rupee" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input">
+										<input type="date" class="input100" id="inputduedate" name="duedate" placeholder="MM/YY" required>
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-envelope" aria-hidden="true"></i>
+										</span>
+										</div>
+									
+									<div class="container-login100-form-btn">
+										<button type="submit" name="submit_manual" class="login100-form-btn">
+											Create
+										</button>
+									</div>																
+									<br class="clearfix"/>
+									
+								</form>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+				<!-- end row -->			
+		</div>
+	</div>                  
+	<!-- end dashboard inner -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function () {
+        $('#accountSelect').on('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            const email = $(selectedOption).data('email');
+            const phone = $(selectedOption).data('phone');
+
+            $('#InputEmail').val(email || '');
+            $('#Inputphone').val(phone || '');
+        });
+    });
+	document.addEventListener("DOMContentLoaded", function () {
+        const dateInput = document.getElementById("inputduedate");
+        const today = new Date();
+        today.setDate(today.getDate() + 30);  // Add 30 days
+
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Month is 0-based
+        const dd = String(today.getDate()).padStart(2, '0');
+
+        const minDate = `${yyyy}-${mm}-${dd}`;
+        dateInput.min = minDate;
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}	
+	<div class="limiter">
+		<div class="container-login100">			
+			<div class="wrap-login100">
+				<div class="wrap-logo100">Asappay</div>
+				<div class="wrap-error100">
+					{% if errmsg %}
+						<div class="text-center"><mark>{{errmsg}}</mark></div>
+					{% endif %}
+				</div>
+				<div class="login100-pic js-tilt" data-tilt>
+					<img src="{% static 'images/img-01.png' %}" alt="IMG">
+				</div>				
+				<form class="custom-form login100-form validate-form" id="regesterform" method="post" role="form">
+					{% csrf_token %}
+					<span class="login100-form-title">
+						Regester
+					</span>					
+					<div class="wrap-input100 validate-input" data-validate = "User Name is required">
+						<input class="input100" name="uname" id="registerusername" type="text" placeholder="User Name"  aria-describedby="emailHelp" required>
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-user" aria-hidden="true"></i>
+						</span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+						<input class="input100" name="uemail" id="registeremail" type="email" placeholder="Email"  aria-describedby="emailHelp" required>
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-envelope" aria-hidden="true"></i>
+						</span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate = "Password is required">
+						<input class="input100" type="password" name="upass" id="registerpassword" placeholder="Password" required>
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+						</span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate = "Confirm Password is required">
+						<input class="input100" type="password" name="ucpass" id="registerpassword" placeholder="Confirm Password" required>
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+						</span>
+					</div>
+					
+					<div class="container-login100-form-btn">
+						<button type="submit" class="login100-form-btn">
+							Regester
+						</button>
+					</div>
+								
+					<br class="clearfix"/>
+					<span class="login100-form-title">
+						Or Sign Up Using
+					</span>
+
+					<div class="flex-c-m">
+						<a href="#" class="login100-social-item bg3">
+							<i class="fa fa-google"></i>
+						</a>
+					</div>
+
+					<div class="text-center p-t-136">
+						<a class="txt2" href="{% url 'index'%}">
+							Login Account
+							<i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
+						</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endblock %}

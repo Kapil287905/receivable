@@ -1,0 +1,77 @@
+{% extends 'baseinner.html' %}
+{% load static %}
+{% block body %}	
+	<!-- dashboard inner -->
+	<div class="midde_cont">
+		<div class="container-fluid">
+			<div class="row column_title">				
+				<div class="col-md-6">
+					<div class="page_title">
+						<h2>Account View</h2>
+					</div>
+				</div>
+				<div class="col-md-6 text-right">
+					<div class="page_title">
+						<h2><a href="{% url 'account' %}"><i class="fa fa-users red_color"></i> <span>Create Account</span></a></h2>
+					</div>
+				</div>
+			</div>
+			<div class="row column_title mb-3">
+				<div class="col-md-12">
+				<form method="GET" action="{% url 'search_accounts' %}" id="searchForm">
+				<div class="row">
+				<div class="col-md-3">					
+					<select name="accountname" 
+							class="js-example-placeholder-single" 
+							id="searchbyname" 
+							style="width: 100%;"
+							onchange="document.getElementById('searchForm').submit();">
+						<option value="" disabled selected hidden>Search by name</option>
+						{% for x in allaccounts %}
+						<option value="{{ x.accountname }}" {% if x.accountname == selected_account %}selected{% endif %}>{{ x.accountname }}</option>
+						{% endfor %}
+					</select>					
+				</div>
+				<div class="col-md-3">
+					<div class="wrap-input100 validate-input">
+						<input class="input100" name="accountcreatedate" id="accountcreatedate" type="date" value="{{ selected_date|default:'' }}">
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-calendar" aria-hidden="true"></i>
+						</span>
+					</div>				
+				</div>
+				</div>
+				</form>
+				</div>
+			</div>
+			<!-- row -->			
+			 <div class="row column1">
+				{% for x in allaccounts %}
+				<div class="col-md-3 mb-3">
+					<div class="white_shd full margin_bottom_30" style="padding: 10px;">
+						<h5 class="card-title">{{x.accountname}}</h5>
+						<p class="card-text">{{x.accountemailid}}</p>
+						<a href="{% url 'accountdetail'  x.accountid %}" class="btn btn-primary text-right">View More</a>
+					</div>
+				</div>
+				{% endfor %}
+			 </div>
+			<!-- end row -->			
+		</div>
+	</div>                  
+	<!-- end dashboard inner -->
+{% endblock %}
+{% block extra_js %}
+<script>
+   $(document).ready(function() {
+    $('#searchbyname').select2({
+      placeholder: "Search by name",
+      allowClear: true
+    }).on('change', function () {
+	  const selectedOption = this.options[this.selectedIndex];
+      $('#searchForm').submit();
+    });
+  });
+</script>
+{% endblock %}

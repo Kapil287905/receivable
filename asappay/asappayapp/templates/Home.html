@@ -1,0 +1,80 @@
+{% extends 'baseinner.html' %}
+{% load static %}
+{% block body %}	
+	<!-- dashboard inner -->
+	<div class="midde_cont">
+		<div class="container-fluid">
+			<div class="row column_title">
+				<div class="col-md-12">
+					<div class="page_title">
+						<h2>Dashboard</h2>
+					</div>
+				</div>
+			</div>
+			<!-- row -->
+			<div class="row column1">
+				<div class="col-md-12">
+					<div class="white_shd full margin_bottom_30">
+						<div class="full graph_head">
+							<div class="heading1 margin_0">
+							<h2>Transaction</h2>
+							</div>
+						</div>
+						<div class="full price_table padding_infor_info">
+							<div class="row">
+								<div class="col-lg-12">									
+									<div class="table-responsive-sm">
+										<table class="table table-striped projects">
+											<thead class="thead-dark">
+												<tr>
+												<th scope="col">No</th>
+												<th scope="col">Client Name</th>
+												<th scope="col">Client email</th>
+												<th scope="col">Create date</th>
+												<th scope="col">Due date</th>
+												<th scope="col">Amount</th>
+												<th scope="col">Status</th>
+												<th scope="col">Resend Email</th>	
+												</tr>
+											</thead>
+											<tbody>
+												{% for x in alltransaction %}
+												<tr>
+												<th scope="row">{{x.transactionid}}</th>
+												<td>{{x.accountid.accountname}}</td>
+												<td>{{x.accountid.accountemailid}}</td>
+												<td>{{x.transactioncreatedate}}</td>
+												<td>{{x.transactionduedate}}</td>
+												<td>₹{{x.transactionamount}}</td>
+												<td>
+													{% if x.transactionstatus == 'paid' %}
+													<span class="badge bg-success">Paid</span>
+													{% elif x.transactionstatus == 'failed' %}
+													<span class="badge bg-danger">Failed</span>
+													{% else %}
+													<span class="badge bg-warning">Pending</span>
+													{% endif %}
+												</td>
+												<td>
+													{% if x.transactionid and x.transactionstatus != "paid" %}
+													<a href="{% url 'resend_email' x.transactionid %}" class="btn btn-primary">
+														Resend Email
+													</a>
+													{% endif %}
+												</td>
+												</tr>
+												{% endfor %}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+				<!-- end row -->			
+		</div>
+	</div>                  
+	<!-- end dashboard inner -->
+{% endblock %}

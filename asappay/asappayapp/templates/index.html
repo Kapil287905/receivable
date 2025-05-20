@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}	
+	<div class="limiter">
+		<div class="container-login100">			
+			<div class="wrap-login100">
+				<div class="wrap-logo100">ASAPpay</div>
+				<div class="login100-pic js-tilt" data-tilt>
+					<img src="{% static 'images/img-01.png' %}" alt="IMG">
+				</div>
+
+				<form class="custom-form login100-form validate-form" method="post" role="form">
+					{% csrf_token %}
+					<span class="login100-form-title">
+						Login
+					</span>
+					{% if errmsg %}
+						<div class="alert alert-warning alert-dismissible fade show" role="alert">
+						<strong>error!</strong> {{errmsg}}.
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+					{% endif %}
+
+					<div class="wrap-input100 validate-input" data-validate = "User Name is required">
+						<input class="input100" name="uname" id="Logieusername" type="text" placeholder="User name"  aria-describedby="emailHelp" required>
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-envelope" aria-hidden="true"></i>
+						</span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+						<input class="input100" name="uemail" id="LogieEmail" type="email" placeholder="Email"  aria-describedby="emailHelp" required>
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-envelope" aria-hidden="true"></i>
+						</span>
+					</div>
+
+					<div class="wrap-input100 validate-input" data-validate = "Password is required">
+						<input class="input100" name="upass" type="password" id="LoginPassword" placeholder="Password" required>
+						<span class="focus-input100"></span>
+						<span class="symbol-input100">
+							<i class="fa fa-lock" aria-hidden="true"></i>
+						</span>
+					</div>
+					
+					<div class="container-login100-form-btn">
+						<button type="submit" class="login100-form-btn">
+							Login
+						</button>
+					</div>
+
+					<div class="text-center p-t-12">
+						<span class="txt1">
+							Forgot
+						</span>
+						<a class="txt2" href="{% url 'req_password' %}">
+							Username / Password?
+						</a>
+					</div>			
+					<br class="clearfix"/>
+					<span class="login100-form-title">
+						Or Sign in Using
+					</span>
+
+					<div class="flex-c-m">
+						<!-- <a href="{% url 'dashboard'%}" class="login100-social-item bg1">
+							<i class="fa fa-facebook"></i>
+						</a> -->
+
+						<a href="#" class="login100-social-item bg3">
+							<i class="fa fa-google"></i>
+						</a>
+					</div>
+
+					<div class="text-center p-t-136">
+						<a class="txt2" href="{% url 'singup'%}">
+							Create your Account
+							<i class="fa fa-long-arrow-right m-l-5" aria-hidden="true"></i>
+						</a>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endblock %}

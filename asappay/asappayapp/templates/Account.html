@@ -1,0 +1,165 @@
+{% extends 'baseinner.html' %}
+{% load static %}
+{% block body %}					
+	<!-- dashboard inner -->
+	<div class="midde_cont">
+		<div class="container-fluid">
+			<div class="row column_title">
+				<div class="col-md-12">
+					<div class="page_title">
+						<h2>Receve account</h2>
+					</div>
+				</div>
+			</div>
+			<!-- row -->
+			<div class="row column1">
+				{% if messages %}
+				<div class="col-md-12 text-center mb-3" style="background-color:#008000; border-radius: 20px;">
+					<ul>
+						{% for message in messages %}
+						<li style="color: #ffffff;padding: 20px;">{{ message }}</li>
+						{% endfor %}
+					</ul>					
+			    </div>
+				{% endif %}
+				<div class="col-md-6">
+					<div class="white_shd full margin_bottom_30">
+						<div class="full graph_head">
+							<div class="heading1 margin_0">
+							<h2>create Account Single</h2>
+							</div>
+						</div>
+						<div class="full price_table padding_infor_info">
+							<div class="row">
+							<div class="col-lg-12">								
+								<form class="custom-form validate-form" method="post" role="form" enctype="multipart/form-data">
+									{% csrf_token %}
+									<div class="wrap-input100 validate-input">
+										<input class="input100" name="aname" id="exampleInputEmail" type="text" placeholder="Name"  aria-describedby="nameHelp">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-user" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input" data-validate = "Valid email is required: ex@abc.xyz">
+										<input class="input100" name="aemail" id="exampleInputEmail" type="email" placeholder="Email"  aria-describedby="emailHelp" required>
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-envelope" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input">
+										<input class="input100" name="aphone" id="exampleInputphone" type="tel" placeholder="Phone" pattern = "[6-9]\d{9}$"  aria-describedby="phoneHelp" required>
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-phone" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input">
+										<input class="input100" name="apannu" id="inputpan" type="text" placeholder="PAN number" pattern="[A-Za-z]{5}[0-9]{4}[A-Za-z]"  aria-describedby="pannuHelp">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-id-card" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input">
+										<input class="input100" name="agstnu" id="inputgst" type="text" placeholder="GST number" pattern="\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}" aria-describedby="gstnuHelp">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-id-card" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input">
+										<input class="input100" name="address" id="address" type="text" placeholder="Address" aria-describedby="addressHelp">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-address-card" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input">
+										<select class="input100" name="country" id="country">
+											<option value="">Select Country</option>
+											{% for code,name in countries %}
+												<option value="{{ code }}">{{ name }}</option>
+											{% endfor %}
+										</select>
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-globe" aria-hidden="true"></i>
+										</span>
+									</div>
+									
+									<div class="wrap-input100 validate-input">
+										<input class="input100" name="city" id="city" type="text" placeholder="city" aria-describedby="cityHelp">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-address-card" aria-hidden="true"></i>
+										</span>
+									</div>
+
+									<div class="wrap-input100 validate-input">
+										<input class="input100" name="pincode" id="pincode" type="text" placeholder="pincode" aria-describedby="pincodeHelp">
+										<span class="focus-input100"></span>
+										<span class="symbol-input100">
+											<i class="fa fa-address-card" aria-hidden="true"></i>
+										</span>
+									</div>
+
+
+									<div class="container-login100-form-btn">
+										<button type="submit" name="submit_manual" class="login100-form-btn">
+											Create
+										</button>
+									</div>																
+									<br class="clearfix"/>
+									
+								</form>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="white_shd full margin_bottom_30">
+						<div class="full graph_head">
+							<div class="heading1 margin_0">
+							<h2>create Account Bulk</h2>
+							</div>
+						</div>
+						<div class="full price_table padding_infor_info">
+							<div class="row">
+							<div class="col-lg-12">
+								<form class="custom-form validate-form" method="post" role="form" enctype="multipart/form-data">
+									{% csrf_token %}
+									{{ form.as_p }}
+									<label for="images" class="drop-container" id="dropcontainer">
+										<span class="drop-title">Drop files here</span>
+										or
+										<input type="file" name="csvfile" id="csvfile" accept=".csv" required>
+									</label>
+
+									<div class="container-login100-form-btn">
+										<button type="submit" name="submit_csv" class="login100-form-btn">
+											Create
+										</button>
+									</div>																
+									<br class="clearfix"/>
+									
+								</form>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+				<!-- end row -->			
+		</div>
+	</div>                  
+	<!-- end dashboard inner -->
+{% endblock %}

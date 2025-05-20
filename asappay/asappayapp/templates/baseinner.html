@@ -1,0 +1,188 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Weoclme to ASAPPay</title>
+	<meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+
+      <meta name="description" content="">
+      <meta name="author" content="">	  
+<!--===============================================================================================-->	
+	<link rel="icon" type="image/png" href="{% static 'images/icons/favicon.ico' %}"/>
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static 'fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+<!--===============================================================================================-->
+	<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+<!--===============================================================================================-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/select2.css' %}">
+<!--===============================================================================================-->	
+</head>
+<body class="dashboard dashboard_1">
+    <div class="full_container">
+        <div class="inner_container">
+            <!-- Sidebar  -->
+            <nav id="sidebar">
+            <div class="sidebar_blog_2">
+                <ul class="list-unstyled components">
+                    <li class="active">
+                        <a href="{% url 'dashboard' %}"><i class="fa fa-dashboard yellow_color"></i> <span>Dashboard</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'accountview' %}"><i class="fa fa-users red_color"></i> <span>Account</span></a>
+                    </li>
+                    <li>
+                        <a href="{% url 'transaction' %}"><i class="fa fa-money orange_color"></i> <span>Receive</span></a>
+                    </li>					  				   
+                </ul>
+            </div>
+            </nav>
+            <!-- end sidebar -->
+            <!-- right content -->
+            <div id="content">
+                <!-- topbar -->
+                <div class="topbar">
+                    <nav class="navbar navbar-expand-lg navbar-light">
+                        <div class="full"> 
+                            <button type="button" id="sidebarCollapse" class="sidebar_toggle"><i class="fa fa-bars"></i></button>
+                            <div class="logo_section">
+                                <a href="{% url 'dashboard' %}"><h1 class="text-white p-2">Asappay</h1></a>
+                            </div>                      
+                            <div class="right_topbar">
+                                <div class="icon_info">							
+                                    <ul class="user_profile_dd">
+                                        <li>
+                                            <a class="dropdown-toggle" data-toggle="dropdown"><img class="img-responsive rounded-circle" src="{% static 'images/user_img.png' %}" alt="#" /><span class="name_user">{{user}}</span></a>
+                                            <div class="dropdown-menu">
+                                                <a class="dropdown-item" href="{% url 'profile' %}">My Profile</a>
+                                                <a class="dropdown-item" href="{% url 'userlogout' %}"><span>Log Out</span> <i class="fa fa-sign-out"></i></a>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+                <!-- end topbar -->
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+    </div>    
+
+<!--===============================================================================================-->	
+<script src="{% static 'js/jquery-3.6.0.js' %}"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<!-- nice scrollbar -->
+<script src="{% static 'js/perfect-scrollbar.min.js' %}"></script>
+<!--Select2 js-->
+<script src="{% static 'js/select2.js' %}"></script>
+<script>
+    var ps = new PerfectScrollbar('#sidebar');
+    $(".dropdown-toggle").click(function() {
+        $(this).next(".dropdown-menu").toggle();
+    });
+    $(".js-example-responsive").select2({
+        width: 'resolve' // need to override the changed default
+    });
+
+    $(".js-example-placeholder-single").select2({
+        placeholder: "Select a client",
+        allowClear: true
+    });
+
+    const inputBoxg = document.getElementById("inputgst")
+    inputBoxg.addEventListener("keydown", (event) => {
+        event.preventDefault();
+        if (event.key == 'Backspace') {
+            inputBoxg.value = inputBoxg.value.substring(0, inputBox.value.length - 1)
+        }
+        if (event.key.length === 1 && !event.ctrlKey && !event.metaKey) {
+            event.preventDefault(); // prevent default typing
+
+            const value = inputBoxg.value.toUpperCase();
+            const currentLength = value.length;
+
+            // Enforce format step by step
+            if (currentLength < 2 && event.key >= '0' && event.key <= '9') {
+                inputBoxg.value += event.key;
+            } else if (currentLength >= 2 && currentLength < 7 && /^[a-zA-Z]$/.test(event.key)) {
+                inputBoxg.value += event.key.toUpperCase();
+            } else if (currentLength >= 7 && currentLength < 11 && /^[0-9]$/.test(event.key)) {
+                inputBoxg.value += event.key;
+            } else if (currentLength === 11 && /^[a-zA-Z]$/.test(event.key)) {
+                inputBoxg.value += event.key.toUpperCase();
+            } else if (currentLength === 12 && /^[A-Z0-9]$/.test(event.key)) {
+                inputBoxg.value += event.key.toUpperCase();
+            } else if (currentLength === 13 && event.key.toUpperCase() === 'Z') {
+                inputBoxg.value += 'Z';
+            } else if (currentLength === 14 && /^[A-Z0-9]$/.test(event.key)) {
+                inputBoxg.value += event.key.toUpperCase();
+            }
+        }
+    })
+
+    const inputBox = document.getElementById("inputpan")
+
+    inputBox.addEventListener("keydown", (event) => {
+        event.preventDefault();
+    
+        if (event.key == 'Backspace') {
+            inputBox.value = inputBox.value.substring(0, inputBox.value.length - 1)
+        }
+        
+        if (event.key.length == 1) {
+            const currentLength = inputBox.value.length
+            const alphaValid = currentLength < 5 || currentLength == 9
+            const numericValid = currentLength >= 5 && currentLength < 9
+        
+            if (alphaValid && event.key >= 'a' && event.key <= 'z' && event.ctrlKey == false) {
+                inputBox.value += event.key.toUpperCase()
+            } else if (alphaValid && event.key >= 'A' && event.key <= 'Z' && event.ctrlKey == false) {
+                inputBox.value += event.key
+            } else if (numericValid && event.key >= '0' && event.key <= '9' && event.ctrlKey == false) {
+                inputBox.value += event.key
+            }
+        }
+    })
+
+    function sendWhatsAppMessage(event) {
+        event.preventDefault(); // Prevent page reload
+
+        const form = event.target; // Reference to the form element
+        const recipient = form.Inputphone.value.trim();
+
+        const message = "Pay now: https://kapil287905.github.io/receivepayment/demo.html";
+
+        const url = "https://api.textmebot.com/send.php";
+        const params = new URLSearchParams({
+            recipient: '+91' + $('#Inputphone').val(),
+            apikey: "mvLPE78avsNX",
+            text: `${message}`,
+        });
+
+        fetch(`${url}?${params}`)
+            .then((response) => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.text(); // Inspect raw response
+            })
+            .then((data) => {
+            console.log("Message sent successfully:", data);
+            })
+            .catch((error) => {
+            console.error("An error occurred:", error.message || error);
+            });
+    }
+
+</script>
+<!-- custom js -->
+<script src="{% static 'js/custom.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>
