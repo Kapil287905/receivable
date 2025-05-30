@@ -18,45 +18,57 @@
 			</div>
 			<div class="row column_title mb-3">
 				<div class="col-md-12">
-				<form method="GET" action="{% url 'search_accounts' %}" id="searchForm">
-				<div class="row">
-				<div class="col-md-3">					
-					<select name="accountname" 
-							class="js-example-placeholder-single" 
-							id="searchbyname" 
-							style="width: 100%;"
-							onchange="document.getElementById('searchForm').submit();">
-						<option value="" disabled selected hidden>Search by name</option>
-						{% for x in allaccounts %}
-						<option value="{{ x.accountname }}" {% if x.accountname == selected_account %}selected{% endif %}>{{ x.accountname }}</option>
-						{% endfor %}
-					</select>					
-				</div>
-				<div class="col-md-3">
-					<div class="wrap-input100 validate-input">
-						<input class="input100" name="accountcreatedate" id="accountcreatedate" type="date" value="{{ selected_date|default:'' }}">
-						<span class="focus-input100"></span>
-						<span class="symbol-input100">
-							<i class="fa fa-calendar" aria-hidden="true"></i>
-						</span>
-					</div>				
-				</div>
-				</div>
-				</form>
+					<form id="search-form">
+						<div class="row">
+							<div class="col-md-3">
+								<div class="wrap-input100 validate-input">
+									<select class="js-example-placeholder-single" id="searchbyname">
+										<option value=""></option>
+										{% for x in allaccounts %}
+										<option value="{{x.accountname}}">{{x.accountname}}</option>
+										{% endfor %}
+									</select>														
+								</div>
+							</div>
+							<div class="col-md-3">
+								<div class="wrap-input100 validate-input">
+									<input type="date" class="input100" id="inputduedate" name="duedate" placeholder="MM/YY" required>
+									<span class="focus-input100"></span>
+									<span class="symbol-input100">
+										<i class="fa fa-envelope" aria-hidden="true"></i>
+									</span>
+									<span class="clear-date" style="
+										display: none;
+										position: absolute;
+										right: 8px;
+										top: 50%;
+										transform: translateY(-50%);
+										cursor: pointer;
+										font-weight: bold;
+										font-size: 18px;
+										color: #999;
+										user-select: none;
+									">×</span>
+								</div>
+							</div>							
+						</div>
+					</form>				
 				</div>
 			</div>
 			<!-- row -->			
-			 <div class="row column1">
+			 <div id="results" class="row column1">
 				{% for x in allaccounts %}
 				<div class="col-md-3 mb-3">
 					<div class="white_shd full margin_bottom_30" style="padding: 10px;">
-						<h5 class="card-title">{{x.accountname}}</h5>
-						<p class="card-text">{{x.accountemailid}}</p>
-						<a href="{% url 'accountdetail'  x.accountid %}" class="btn btn-primary text-right">View More</a>
+					<h5 class="card-title">{{ x.accountname }}</h5>
+					<p class="card-text">{{ x.accountemailid }}</p>
+					<a href="{% url 'accountdetail' x.accountid %}" class="btn btn-primary">View More</a>
 					</div>
 				</div>
+				{% empty %}
+				<div class="col-12"><p>No accounts found.</p></div>
 				{% endfor %}
-			 </div>
+			</div>
 			<!-- end row -->			
 		</div>
 	</div>                  
@@ -64,14 +76,58 @@
 {% endblock %}
 {% block extra_js %}
 <script>
-   $(document).ready(function() {
-    $('#searchbyname').select2({
-      placeholder: "Search by name",
-      allowClear: true
-    }).on('change', function () {
-	  const selectedOption = this.options[this.selectedIndex];
-      $('#searchForm').submit();
+$(document).ready(function() {
+    const $input = $('#inputduedate');
+    const $clear = $('.clear-date');
+
+    // Show or hide the clear button on input change
+    $input.on('input change', function() {
+        if ($(this).val()) {
+            $clear.show();
+        } else {
+            $clear.hide();
+        }
     });
-  });
+
+    // Clear input when clicking the "x"
+    $clear.on('click', function() {
+        $input.val('');
+        $clear.hide();
+        $input.trigger('change');  // trigger change if needed to update search or UI
+    });
+
+    // Initially check on page load
+    if ($input.val()) {
+        $clear.show();
+    }
+});
+$(function(){
+	$('#searchbyname').select2({
+		placeholder: 'Search by name',
+		allowClear: true
+	});
+
+	$('#search-form').on('change', function(e) {
+		e.preventDefault();
+
+		const data = {
+			accountname:    $('#searchbyname').val(),
+			accountcreatedate: $('#inputduedate').val()
+		};
+
+		$.ajax({
+			url: "{% url 'search_account' %}",
+			data: data,
+			headers: { 'X-Requested-With': 'XMLHttpRequest' },
+			success: function(html) {
+				// pull only the updated rows out of the full template
+				const result = $(html).find('#results').html();
+				$('#results').html(result);
+			}
+		});
+	});
+
+
+});
 </script>
 {% endblock %}

@@ -163,3 +163,62 @@
 	</div>                  
 	<!-- end dashboard inner -->
 {% endblock %}
+{% block extra_js %}
+<script>
+	const inputBoxg = document.getElementById("inputgst")
+	inputBoxg.addEventListener("keydown", (event) => {
+		event.preventDefault();
+		if (event.key == 'Backspace') {
+			inputBoxg.value = inputBoxg.value.substring(0, inputBox.value.length - 1)
+		}
+		if (event.key.length === 1 && !event.ctrlKey && !event.metaKey) {
+			event.preventDefault(); // prevent default typing
+
+			const value = inputBoxg.value.toUpperCase();
+			const currentLength = value.length;
+
+			// Enforce format step by step
+			if (currentLength < 2 && event.key >= '0' && event.key <= '9') {
+				inputBoxg.value += event.key;
+			} else if (currentLength >= 2 && currentLength < 7 && /^[a-zA-Z]$/.test(event.key)) {
+				inputBoxg.value += event.key.toUpperCase();
+			} else if (currentLength >= 7 && currentLength < 11 && /^[0-9]$/.test(event.key)) {
+				inputBoxg.value += event.key;
+			} else if (currentLength === 11 && /^[a-zA-Z]$/.test(event.key)) {
+				inputBoxg.value += event.key.toUpperCase();
+			} else if (currentLength === 12 && /^[A-Z0-9]$/.test(event.key)) {
+				inputBoxg.value += event.key.toUpperCase();
+			} else if (currentLength === 13 && event.key.toUpperCase() === 'Z') {
+				inputBoxg.value += 'Z';
+			} else if (currentLength === 14 && /^[A-Z0-9]$/.test(event.key)) {
+				inputBoxg.value += event.key.toUpperCase();
+			}
+		}
+	})
+
+	const inputBox = document.getElementById("inputpan")
+
+	inputBox.addEventListener("keydown", (event) => {
+		event.preventDefault();
+	
+		if (event.key == 'Backspace') {
+			inputBox.value = inputBox.value.substring(0, inputBox.value.length - 1)
+		}
+		
+		if (event.key.length == 1) {
+			const currentLength = inputBox.value.length
+			const alphaValid = currentLength < 5 || currentLength == 9
+			const numericValid = currentLength >= 5 && currentLength < 9
+		
+			if (alphaValid && event.key >= 'a' && event.key <= 'z' && event.ctrlKey == false) {
+				inputBox.value += event.key.toUpperCase()
+			} else if (alphaValid && event.key >= 'A' && event.key <= 'Z' && event.ctrlKey == false) {
+				inputBox.value += event.key
+			} else if (numericValid && event.key >= '0' && event.key <= '9' && event.ctrlKey == false) {
+				inputBox.value += event.key
+			}
+		}
+	})
+
+</script>
+{% endblock %}

@@ -74,7 +74,7 @@
 										<span class="symbol-input100">
 											<i class="fa fa-envelope" aria-hidden="true"></i>
 										</span>
-										</div>
+									</div>
 									
 									<div class="container-login100-form-btn">
 										<button type="submit" name="submit_manual" class="login100-form-btn">
@@ -83,6 +83,55 @@
 									</div>																
 									<br class="clearfix"/>
 									
+								</form>
+							</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-6">
+					<div class="white_shd full margin_bottom_30">
+						<div class="full graph_head">
+							<div class="heading1 margin_0">
+							<h2>create Bulk Transaction</h2>
+							</div>
+						</div>
+						<div class="full price_table padding_infor_info">
+							<div class="row">
+							<div class="col-lg-12">
+								<form class="custom-form validate-form" method="post" role="form" enctype="multipart/form-data">
+									{% csrf_token %}
+									<div class="wrap-input100 validate-input">
+										<select class="js-example-placeholder-single"  multiple id="accountSelectm">
+											<option value=""></option>
+											{% for x in allaccount %}
+											<option value="{{x.accountname}}" data-email="{{ x.accountemailid }}" 
+											data-phone="{{ x.accountphone }}">{{x.accountname}}</option>
+											{% endfor %}
+										</select>														
+									</div>
+									<div class="table-responsive" style="margin-top: 20px; display: none;overflow: auto;" id="tableWrapper">
+										<table id="transactionTable" class="table table-bordered table-striped table-hover">
+											<thead class="table-dark">
+												<tr>
+													<th>Account ID</th>
+													<th>Phone</th>
+													<th>Email</th>
+													<th>Amount (₹)</th>
+													<th>Due Date</th>
+												</tr>
+											</thead>
+											<tbody>
+												<!-- rows will be inserted here -->
+											</tbody>
+										</table>
+									</div>
+									<div class="container-login100-form-btn" style="display: none;" id="submitcsv">
+										<button type="submit" name="submit_bulk" class="login100-form-btn">
+											Create
+										</button>
+									</div>																					
+									<br class="clearfix"/>									
 								</form>
 							</div>
 							</div>
@@ -103,10 +152,60 @@
             const selectedOption = this.options[this.selectedIndex];
             const email = $(selectedOption).data('email');
             const phone = $(selectedOption).data('phone');
+			console.log(selectedOption)
 
             $('#InputEmail').val(email || '');
             $('#Inputphone').val(phone || '');
         });
+		const today = new Date();
+		const minDue = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
+		const yyyy  = minDue.getFullYear();
+		const mm    = String(minDue.getMonth() + 1).padStart(2,'0');
+		const dd    = String(minDue.getDate()).padStart(2,'0');
+		const minDate = `${yyyy}-${mm}-${dd}`;
+
+		// ② Hide table + submit button initially
+		$('#tableWrapper, #submitcsv').hide();
+
+		// ③ Then your change handler
+		$('#accountSelectm').on('change', function () {
+			const selected = $(this).find('option:selected');
+			const $tbody   = $('#transactionTable tbody');
+			$tbody.empty();
+
+			if (selected.length) {
+			$('#tableWrapper, #submitcsv').show();
+
+			selected.each(function () {
+				const accountId = $(this).val();
+				const email     = $(this).data('email');
+				const phone     = $(this).data('phone');
+
+				console.log(accountId)
+
+				const row = `
+				<tr>
+					<td><input type="text"   name="account_id[]" value="${accountId}" readonly></td>
+					<td><input type="text"   name="email[]"      value="${email}"     readonly></td>
+					<td><input type="text"   name="phone[]"      value="${phone}"     readonly></td>
+					<td><input type="number" name="amount[]"     required></td>
+					<td>
+					<input type="date"
+							name="duedate[]"
+							required
+							min="${minDate}"
+							title="Due date must be on or after ${minDate}">
+					</td>
+				</tr>
+				`;
+				$tbody.append(row);
+				console.log(email)
+			});
+			} else {
+			$('#tableWrapper, #submitcsv').hide();
+			}
+		});
+		
     });
 	document.addEventListener("DOMContentLoaded", function () {
         const dateInput = document.getElementById("inputduedate");

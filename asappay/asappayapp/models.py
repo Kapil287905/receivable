@@ -6,6 +6,7 @@ from .validators import validate_pan
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils import timezone
 from django_countries.fields import CountryField
+from django.db.models import Max
 
 # Create your models here.
 
@@ -52,6 +53,7 @@ class Accountsc(models.Model):
 
 class Transaction(models.Model):
     transactionid = models.AutoField(primary_key=True)
+    invoiceno = models.IntegerField(unique=True, null=True, blank=True)
     userid = models.ForeignKey(User,on_delete=models.SET_NULL,null=True,default=None,related_name='transactions_started')
     accountid = models.ForeignKey(Accountsc, on_delete=models.SET_NULL, null=True, default=None, related_name='transactions_received')    
     transactionamount = models.DecimalField(max_digits=10, decimal_places=2)
@@ -64,3 +66,9 @@ class Transaction(models.Model):
     ]
     transactionstatus = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     razorpay_payment_id  = models.CharField(max_length=100, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.invoiceno is None:
+            last_invoice = Transaction.objects.aggregate(Max('invoiceno'))['invoiceno__max']
+            self.invoiceno = (last_invoice or 100) + 1  # Start at 1001 if none exists
+        super().save(*args, **kwargs)

@@ -22,12 +22,62 @@
 						</div>
 						<div class="full price_table padding_infor_info">
 							<div class="row">
+								<div class="col-lg-12 mb-2">
+									<form id="search-form">
+										<div class="row">
+											<div class="col-md-3">
+												<div class="wrap-input100 validate-input">
+													<select class="js-example-placeholder-single" id="searchbyname">
+														<option value=""></option>
+														{% for x in allaccounts %}
+														<option value="{{x.accountname}}">{{x.accountname}}</option>
+														{% endfor %}
+													</select>														
+												</div>
+											</div>
+											<div class="col-md-3">
+												<div class="wrap-input100 validate-input">
+													<input type="date" class="input100" id="inputduedate" name="duedate" placeholder="MM/YY" required>
+													<span class="focus-input100"></span>
+													<span class="symbol-input100">
+														<i class="fa fa-envelope" aria-hidden="true"></i>
+													</span>
+													<span class="clear-date" style="
+														display: none;
+														position: absolute;
+														right: 8px;
+														top: 50%;
+														transform: translateY(-50%);
+														cursor: pointer;
+														font-weight: bold;
+														font-size: 18px;
+														color: #999;
+														user-select: none;
+													">×</span>
+												</div>
+											</div>
+											<div class="col-md-3">
+												<div class="wrap-input100 validate-input">
+													<select class="js-example-placeholder-single" name="transactionstatus" id="transactionstatus">
+														<option value=""></option>
+														<option value="pending">Pending</option>
+														<option value="paid">Paid</option>
+														<option value="failed">Failed</option>
+													</select>
+												</div>
+											</div>							
+										</div>
+									</form>
+								</div>
+							</div>
+							<div class="row">
 								<div class="col-lg-12">									
 									<div class="table-responsive-sm">
-										<table class="table table-striped projects">
+										<table class="table table-striped projects" id="results">
 											<thead class="thead-dark">
 												<tr>
 												<th scope="col">No</th>
+												<th scope="col">Invoice No</th>
 												<th scope="col">Client Name</th>
 												<th scope="col">Client email</th>
 												<th scope="col">Create date</th>
@@ -41,6 +91,7 @@
 												{% for x in alltransaction %}
 												<tr>
 												<th scope="row">{{x.transactionid}}</th>
+												<td>{{x.invoiceno}}</td>
 												<td>{{x.accountid.accountname}}</td>
 												<td>{{x.accountid.accountemailid}}</td>
 												<td>{{x.transactioncreatedate}}</td>
@@ -56,7 +107,7 @@
 													{% endif %}
 												</td>
 												<td>
-													{% if x.transactionid and x.transactionstatus != "paid" %}
+													{% if x.transactionid and x.transactioncreatedate != now and x.transactionstatus != "paid" %}
 													<a href="{% url 'resend_email' x.transactionid %}" class="btn btn-primary">
 														Resend Email
 													</a>
@@ -77,4 +128,67 @@
 		</div>
 	</div>                  
 	<!-- end dashboard inner -->
+{% endblock %}
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    const $input = $('#inputduedate');
+    const $clear = $('.clear-date');
+
+    // Show or hide the clear button on input change
+    $input.on('input change', function() {
+        if ($(this).val()) {
+            $clear.show();
+        } else {
+            $clear.hide();
+        }
+    });
+
+    // Clear input when clicking the "x"
+    $clear.on('click', function() {
+        $input.val('');
+        $clear.hide();
+        $input.trigger('change');  // trigger change if needed to update search or UI
+    });
+
+    // Initially check on page load
+    if ($input.val()) {
+        $clear.show();
+    }
+});
+$(function(){
+	$('#searchbyname').select2({
+		placeholder: 'Search by name',
+		allowClear: true
+	});
+
+	$('#transactionstatus').select2({
+		placeholder: 'Search by status',
+		allowClear: true
+	});
+
+	$('#search-form').on('change', function(e) {
+		e.preventDefault();
+
+		const data = {
+			accountname:    $('#searchbyname').val(),
+			transactionstatus: $("#transactionstatus").val(),
+			transactionduedate: $('#inputduedate').val()
+		};
+
+		$.ajax({
+			url: "{% url 'search_transaction' %}",
+			data: data,
+			headers: { 'X-Requested-With': 'XMLHttpRequest' },
+			success: function(html) {
+				// pull only the updated rows out of the full template
+				const result = $(html).find('#results').html();
+				$('#results').html(result);
+			}
+		});
+	});
+
+
+});
+</script>
 {% endblock %}

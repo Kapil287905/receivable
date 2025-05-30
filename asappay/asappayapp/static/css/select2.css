@@ -177,15 +177,17 @@
   border-width: 0 4px 5px 4px; }
 
 .select2-container--default .select2-selection--multiple {
-  background-color: white;
-  border: 1px solid #aaa;
-  border-radius: 4px;
+  background-color: #e6e6e6;
+  border: 0px solid #aaa;
+  border-radius: 20px;
+  padding: 0px 10px;
+  height: 48px;
   cursor: text; }
   .select2-container--default .select2-selection--multiple .select2-selection__rendered {
     box-sizing: border-box;
     list-style: none;
     margin: 0;
-    padding: 0 5px;
+    line-height: 38px;
     width: 100%; }
     .select2-container--default .select2-selection--multiple .select2-selection__rendered li {
       list-style: none; }
@@ -201,7 +203,7 @@
     margin-right: 10px; }
   .select2-container--default .select2-selection--multiple .select2-selection__choice {
     background-color: #e4e4e4;
-    border: 1px solid #aaa;
+    border: 0px solid #aaa;
     border-radius: 4px;
     cursor: default;
     float: left;

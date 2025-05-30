@@ -2,6 +2,7 @@ import csv
 from django.shortcuts import render, redirect,get_object_or_404
 from django.http import HttpResponse, HttpResponseBadRequest,JsonResponse
 from .models import Transaction,Accountsc,UserProfile
+from django.template.loader import render_to_string
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout 
@@ -20,6 +21,7 @@ from email.message import EmailMessage
 from django_countries import countries
 from django.utils.dateparse import parse_date
 from django.urls import reverse
+from datetime import date, timedelta
 
 # Create your views here.
 print(certifi.where())
@@ -121,11 +123,13 @@ def singup(req):
                 return render(req,"regester.html",context)
 
 def dashboard(req):
-    alltransaction=Transaction.objects.all().select_related('accountid')    
+    alltransaction=Transaction.objects.all().select_related('accountid')
+    allaccounts = Accountsc.objects.all() 
+    now = timezone.now()   
     print(alltransaction)
     print(req.user)
     username = req.user
-    return render(req, "home.html",{"username": username,"alltransaction":alltransaction})
+    return render(req, "home.html",{"username": username,"alltransaction":alltransaction,"allaccounts":allaccounts,"now": now})
 
 def editprofile(req,profileid):
     profile=get_object_or_404(UserProfile,id=profileid)
@@ -355,17 +359,57 @@ def accountview(req):
         req, "Accountview.html", {"allaccounts": allaccounts}
     )
 
-def search_accounts(request):
+def search_account(request):
+    name = request.GET.get('accountname')
+    createdate = request.GET.get('accountcreatedate')
     allaccounts = Accountsc.objects.all()
+    if name:
+        allaccounts = allaccounts.filter(accountname=name) if name else allaccounts
+   
+    if createdate:
+         allaccounts = allaccounts.filter(accountcreatedate=createdate) if createdate else allaccounts
 
-    selected_account = request.GET.get('accountname')
+    context = {
+        'allaccounts': allaccounts,            # For displaying
+        'ajax': request.headers.get('x-requested-with') == 'XMLHttpRequest',
+    }
 
-    if selected_account:
-        allaccounts = Accountsc.objects.filter(accountname=selected_account)
+    if context['ajax']:
+        # Return partial HTML (only results section)
+        html = render_to_string('Accountview.html', context, request=request)
+        return HttpResponse(html)
+
+    # Full page load
+    return render(request, 'Accountview.html', context)
+
+def search_transaction(request):
+    name = request.GET.get('accountname')
+    duedate = request.GET.get('transactionduedate')
+    status = request.GET.get('transactionstatus')
+    alltransaction = Transaction.objects.select_related('accountid').all()
+    print(status)
+
+    if name:
+        alltransaction = alltransaction.filter(accountid__accountname__iexact=name)
+   
+    if duedate:
+         alltransaction = alltransaction.filter(transactionduedate=duedate) if duedate else alltransaction
     
-    return render(request, 'Accountview.html', {
-        'allaccounts': allaccounts,'selected_account': selected_account
-    })
+    if status:
+         alltransaction = alltransaction.filter(transactionstatus=status) if status else alltransaction
+
+    context = {
+        'alltransaction': alltransaction,            # For displaying
+        'ajax': request.headers.get('x-requested-with') == 'XMLHttpRequest',
+    }
+
+    if context['ajax']:
+        # Return partial HTML (only results section)
+        html = render_to_string('Home.html', context, request=request)
+        return HttpResponse(html)
+
+    # Full page load
+    return render(request, 'Home.html', context)
 
 def accountdetail(req,accountid):
     accounts=Accountsc.objects.get(accountid=accountid)
@@ -401,79 +445,158 @@ def deleteaccount(req,accountid):
     accounts = get_object_or_404(Accountsc, accountid=accountid)
     accounts.delete()
     return redirect('accountview')
+   
 
 def transaction(request):
     username   = request.user
     allaccount = Accountsc.objects.all()
 
+    # GET: just render form(s)
     if request.method == "GET":
         return render(request, "receive.html", {
             "username": username,
             "allaccount": allaccount,
         })
 
-    # POST
-    email   = request.POST.get('email', '').strip()
-    amount  = request.POST.get('amount', '').strip()
-    duedate = request.POST.get('duedate', '').strip()
+    # POST: distinguish by which button was clicked
+    # — single create uses name="submit_manual"
+    if 'submit_manual' in request.POST:
+        email   = request.POST.get('email', '').strip()
+        amount  = request.POST.get('amount', '').strip()
+        duedate = request.POST.get('duedate', '').strip()
 
-    print(email,amount,duedate)
+        # Validate email
+        try:
+            validate_email(email)
+        except ValidationError as e:
+            messages.error(request, e.messages[0])
+            return redirect('transaction')
 
-    # 1) Validate email
-    try:
-        validate_email(email)
-    except ValidationError as e:
-        messages.error(request, e.messages[0])
-        return redirect('transaction')  # name of this view in urls.py
+        # Lookup account
+        account = Accountsc.objects.filter(accountemailid__iexact=email).first()
+        if not account:
+            messages.error(request, "Account does not exist for this email.")
+            return redirect('transaction')
 
-    # 2) Lookup account
-    account = Accountsc.objects.filter(accountemailid__iexact=email).first()
-    if not account:
-        messages.error(request, "Account does not exist for this email.")
-        return redirect('transaction')
+        # Create transaction
+        try:
+            txn = Transaction.objects.create(
+                userid=request.user,
+                accountid=account,
+                transactionamount=Decimal(amount),
+                transactioncreatedate=timezone.now().date(),
+                transactionduedate=duedate,
+            )
+        except Exception as e:
+            messages.error(request, f"Error creating transaction: {e}")
+            return redirect('transaction')
 
-    # 3) Create transaction
-    try:
-        txn = Transaction.objects.create(
-            userid=request.user,
-            accountid=account,
-            # transactionid—let Django auto‐assign an AutoField or UUID
-            transactionamount=amount,
-            transactioncreatedate=timezone.now().date(),
-            transactionduedate=duedate,
+        # 4) Send email
+        invoice_url = request.build_absolute_uri(
+            reverse('invoice', kwargs={'transactionid': txn.transactionid})
         )
-    except Exception as e:
-        messages.error(request, f"Error creating transaction: {e}")
+        sender = settings.EMAIL_HOST_USER
+        password = settings.EMAIL_HOST_PASSWORD
+        receiver = email
+
+        msg = EmailMessage()
+        msg.set_content(
+            f"Thank you! A transaction of ₹{amount} was created.\n"
+            f"Pay now: {invoice_url}"
+        )
+        msg["Subject"] = "Invoice for Your Transaction"
+        msg["From"] = sender
+        msg["To"] = receiver
+
+        context = ssl._create_unverified_context()
+
+        try:
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.starttls(context=context)
+                server.login(sender, password)
+                server.send_message(msg)
+            messages.success(request, f"✅ Transaction #{txn.invoiceno} created and email sent to {email}!")
+            return redirect("transaction")
+        except Exception as e:
+            messages.error(request, f"❌ Failed to send email: {e}")
+            return render(request, 'receive.html')
+
+    # — bulk create uses name="submit_bulk"
+    elif 'submit_bulk' in request.POST:
+        ids      = request.POST.getlist('account_id[]')
+        emails   = request.POST.getlist('email[]')
+        amounts  = request.POST.getlist('amount[]')
+        duedates = request.POST.getlist('duedate[]')
+
+        created = 0
+        for i, accountid in enumerate(ids):
+            email   = emails[i].strip()
+            amount  = amounts[i].strip()
+            duedate = duedates[i].strip()
+
+            # 1) Validate email
+            try:
+                validate_email(email)
+            except ValidationError:
+                messages.error(request, f"Invalid email: {email}")
+                continue
+
+            # 2) Lookup account
+            account = Accountsc.objects.filter(accountemailid__iexact=email).first()
+            if not account:
+                messages.error(request, f"No account for ID {accountid}")
+                continue
+
+            # 3) Create transaction
+            try:
+                txn = Transaction.objects.create(
+                    userid=request.user,
+                    accountid=account,
+                    transactionamount=Decimal(amount),
+                    transactioncreatedate=timezone.now().date(),
+                    transactionduedate=duedate,
+                )
+            except Exception as e:
+                messages.error(request, f"Error creating txn for {email}: {e}")
+                continue
+
+            # 4) Send email
+            invoice_url = request.build_absolute_uri(
+                reverse('invoice', kwargs={'transactionid': txn.transactionid})
+            )
+            msg = EmailMessage()
+            msg.set_content(
+                f"Thank you! A transaction of ₹{amount} was created.\n"
+                f"Pay now: {invoice_url}"
+            )
+            msg["Subject"] = "Invoice for Your Transaction"
+            msg["From"]    = settings.EMAIL_HOST_USER
+            msg["To"]      = email
+
+            context = ssl._create_unverified_context()
+            try:
+                with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                    server.starttls(context=context)
+                    server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+                    server.send_message(msg)
+            except Exception as e:
+                messages.error(request, f"❌ Failed to send email to {email}: {e}")
+                # but don't break—move on to next
+            else:
+                created += 1
+
+        # Only after processing all rows:
+        if created:
+            messages.success(request, f"✅ {created} transactions created and emails sent.")
         return redirect('transaction')
 
-    # 4) Send email
-    invoice_url = request.build_absolute_uri(
-        reverse('invoice', kwargs={'transactionid': txn.transactionid})
-    )
-    sender = settings.EMAIL_HOST_USER
-    password = settings.EMAIL_HOST_PASSWORD
-    receiver = email
 
-    msg = EmailMessage()
-    msg.set_content(
-        f"Thank you! A transaction of ₹{amount} was created.\n"
-        f"Pay now: {invoice_url}"
-    )
-    msg["Subject"] = "Invoice for Your Transaction"
-    msg["From"] = sender
-    msg["To"] = receiver
+    # Fallback
+    return render(request, "receive.html", {
+        "username": request.user,
+        "allaccount": Accountsc.objects.all(),
+    })
 
-    context = ssl._create_unverified_context()
-
-    try:
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls(context=context)
-            server.login(sender, password)
-            server.send_message(msg)
-        return redirect("transaction")
-    except Exception as e:
-        messages.error(request, f"❌ Failed to send email: {e}")
-        return render(request, 'receive.html')
 
 def resend_transaction_email(request, transactionid):
     txn = get_object_or_404(Transaction, transactionid=transactionid)
@@ -511,16 +634,45 @@ def resend_transaction_email(request, transactionid):
         messages.error(request, f"❌ Failed to resend email: {e}")
 
     return redirect('dashboard')  
-     
+
+from decimal import Decimal
+
+def calculate_all_adjusted_amounts(amount):
+    discount_2_percent = (amount * Decimal('0.98')).quantize(Decimal('0.01'))
+    discount_1_percent = (amount * Decimal('0.99')).quantize(Decimal('0.01'))
+    penalty_2_percent = (amount * Decimal('1.02')).quantize(Decimal('0.01'))
+
+    return {
+        'discount_2_percent': discount_2_percent,
+        'discount_1_percent': discount_1_percent,
+        'penalty_2_percent': penalty_2_percent,
+    }    
         
 def invoice_view(request, transactionid):
     transaction = get_object_or_404(Transaction, transactionid=transactionid)
     account = transaction.accountid 
 
-    amount_in_paise = int(float(transaction.transactionamount) * 100)
+    days_to_due = (transaction.transactionduedate - date.today()).days
+
+    adjusted_amounts = calculate_all_adjusted_amounts(transaction.transactionamount)
+
+    if days_to_due > 15:
+        final_amount = adjusted_amounts['discount_2_percent']  # 2% discount
+    elif 0 <= days_to_due <= 15:
+        final_amount = adjusted_amounts['discount_1_percent']  # 1% discount
+    else:
+        final_amount = adjusted_amounts['penalty_2_percent']   # 2% penalty
+
+    print(final_amount)
+
+    amount_in_paise = int(final_amount * 100)  # convert to paise for Razorpay
 
     context = {
         "transaction": transaction,
+        'discount_2_percent': adjusted_amounts['discount_2_percent'],
+        'discount_1_percent': adjusted_amounts['discount_1_percent'],
+        'penalty_2_percent': adjusted_amounts['penalty_2_percent'],
+        "final_amount": final_amount,
         "account": account,
         "razorpay_key": settings.RAZORPAY_KEY_ID,
         "amount": amount_in_paise,

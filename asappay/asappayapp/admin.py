@@ -40,6 +40,7 @@ admin.site.register(Accountsc,AccountscAdmin)
 class transactionAdmin(admin.ModelAdmin):
     list_display=[
         "transactionid",
+        "invoiceno",
         "userid",
         "transactionamount",
         'accountid',

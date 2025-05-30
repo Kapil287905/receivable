@@ -9,7 +9,7 @@
             </div>
             <div>
                 <h2>Invoice</h2>
-                <p>Invoice #: {{transaction.transactionid}}<br>Date: {{transaction.transactioncreatedate}}<br>Due Date: {{transaction.transactionduedate}}</p>
+                <p>Invoice #: {{transaction.invoiceno}}<br>Date: {{transaction.transactioncreatedate}}<br>Due Date: {{transaction.transactionduedate}}</p>
             </div>
         </div>
 
@@ -56,7 +56,11 @@
         </div>-->
 
         <div class="total">
-            <strong>Total: ₹{{transaction.transactionamount}}</strong>
+            <strong>Total: ₹{{final_amount}}</strong>
+            <p><strong>Original Amount: ₹{{ transaction.transactionamount }}</strong></p>
+            <p>Amount with 2% discount (more than 15 days before due): ₹{{ discount_2_percent }}</p>
+            <p>Amount with 1% discount (within 15 days before due): ₹{{ discount_1_percent }}</p>
+            <p>Amount with 2% penalty (after due date): ₹{{ penalty_2_percent }}</p>
         </div>
         {% if transaction.transactionstatus != "paid" %}
             <div class="payment-method-selector">

@@ -1,0 +1,6 @@
+pip install django-countries
+pip install razorpay
+pip install setuptools
+pip install social-auth-app-Django
+pip install django twilio
+

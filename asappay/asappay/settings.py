@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-kw58sn(hqq%*izr@*we@v9_l5a=$yl^ulv@z=#dkx4-ng@0i&^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,8 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'asappayapp.apps.AsappayappConfig',
-    'webpage.apps.WebpageConfig',    
+    'webpage.apps.WebpageConfig',
+    'asappayapp.apps.AsappayappConfig',        
     'phonenumber_field',
     'django_countries',
 ]
