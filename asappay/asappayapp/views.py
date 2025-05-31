@@ -386,47 +386,69 @@ def search_account(request):
     return render(request, 'Accountview.html', context)
 
 def search_transaction(request):
-    name = request.GET.get('accountname')
-    duedate = request.GET.get('transactionduedate')
-    status = request.GET.get('transactionstatus')
+    # 1) Read raw filter parameters (they'll be strings or None)
+    name    = request.GET.get('accountname', '').strip()
+    duedate = request.GET.get('transactionduedate', '').strip()
+    status  = request.GET.get('transactionstatus', '').strip()
 
+    # 2) Start with all transactions, joining to accountid
     alltransaction = Transaction.objects.select_related('accountid').all()
 
+    # 3) Apply filters one by one (only if the value is non‐empty)
     if name:
         alltransaction = alltransaction.filter(accountid__accountname__iexact=name)
+
     if duedate:
+        # Assuming the incoming date is already "YYYY-MM-DD"
         alltransaction = alltransaction.filter(transactionduedate=duedate)
+
     if status:
         alltransaction = alltransaction.filter(transactionstatus=status)
 
-    # Add pagination here
-    paginator = Paginator(alltransaction.order_by('-invoiceno'), 10)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    # 4) Always order by invoice number descending (latest first)
+    alltransaction = alltransaction.order_by('-invoiceno')
 
-    # Build query string for pagination links
+    # 5) Paginate: 10 items per page
+    paginator   = Paginator(alltransaction, 10)
+    page_number = request.GET.get('page')  # e.g. "1", "2", ...
+    page_obj    = paginator.get_page(page_number)
+
+    print(page_obj)
+
+    # 6) Build a small “query_string” to re‐append the non‐empty filters to every ?page= link
+    #    Example: "&accountname=Foo&transactionduedate=2025-05-30&transactionstatus=paid"
     filter_params = {
-        "accountname": name,
-        "transactionduedate": duedate,
-        "transactionstatus": status,
+        'accountname': name,
+        'transactionduedate': duedate,
+        'transactionstatus': status,
     }
-    query_string = "&" + "&".join(
-        f"{key}={val}"
-        for key, val in filter_params.items()
-        if val
-    )
+    # Only include params that actually have a value
+    parts = []
+    for key, val in filter_params.items():
+        if val:
+            parts.append(f"{key}={val}")
+    # Prepend “&” so we can do href="?page=2{{ query_string }}"
+    query_string = "&" + "&".join(parts) if parts else ""
 
+    # 7) Build context: 
+    #    - 'alltransaction' is the page_obj (so your template loops over page_obj)
+    #    - pass each raw filter-value back so the form inputs can stay filled
     context = {
-        'alltransaction': page_obj,
-        'page_obj': page_obj,
+        'alltransaction': page_obj,              # iterate over this in template
+        'page_obj': page_obj,                   # for pagination logic (has_next, previous_page_number, etc.)
+        'accountname': name,
+        'transactionduedate': duedate,
+        'transactionstatus': status,
         'query_string': query_string,
         'ajax': request.headers.get('x-requested-with') == 'XMLHttpRequest',
     }
 
+    # 8) If it’s an AJAX request, return just the HTML fragment (e.g. your table + pagination block)
     if context['ajax']:
         html = render_to_string('home.html', context, request=request)
         return HttpResponse(html)
 
+    # 9) Otherwise, render the full page
     return render(request, 'home.html', context)
 
 def accountdetail(req,accountid):

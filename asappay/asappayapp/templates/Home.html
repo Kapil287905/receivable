@@ -17,7 +17,7 @@
 					<div class="white_shd full margin_bottom_30">
 						<div class="full graph_head">
 							<div class="heading1 margin_0">
-							<h2>Transaction</h2>
+								<h2>Transaction</h2>
 							</div>
 						</div>
 						<div class="full price_table padding_infor_info" style="padding: 15px 35px 35px 35px;">
@@ -31,37 +31,49 @@
 													<select class="js-example-placeholder-single" id="searchbyname">
 														<option value=""></option>
 														{% for x in allaccounts %}
-														<option value="{{x.accountname}}">{{x.accountname}}</option>
+															<option value="{{ x.accountname }}">{{ x.accountname }}</option>
 														{% endfor %}
 													</select>														
 												</div>
 											</div>
 											<div class="col-md-3">
 												<small style="padding: 0px 20px;">Due Date</small>
-												<div class="wrap-input100 validate-input">
-													<input type="date" class="input100" id="inputduedate" name="duedate">													
+												<div class="wrap-input100 validate-input" style="position: relative;">
+													<input
+														type="date"
+														class="input100"
+														id="inputduedate"
+														name="duedate"
+													>														
 													<span class="focus-input100"></span>
 													<span class="symbol-input100">
 														<i class="fa fa-calendar" aria-hidden="true"></i>
 													</span>
-													<span class="clear-date" style="
-														display: none;
-														position: absolute;
-														right: 8px;
-														top: 50%;
-														transform: translateY(-50%);
-														cursor: pointer;
-														font-weight: bold;
-														font-size: 18px;
-														color: #999;
-														user-select: none;
-													">×</span>
+													<span
+														class="clear-date"
+														style="
+															display: none;
+															position: absolute;
+															right: 8px;
+															top: 50%;
+															transform: translateY(-50%);
+															cursor: pointer;
+															font-weight: bold;
+															font-size: 18px;
+															color: #999;
+															user-select: none;
+														"
+													>×</span>
 												</div>
 											</div>
 											<div class="col-md-3">
 												<small>&nbsp;</small>
 												<div class="wrap-input100 validate-input">
-													<select class="js-example-placeholder-single" name="transactionstatus" id="transactionstatus">
+													<select
+														class="js-example-placeholder-single"
+														name="transactionstatus"
+														id="transactionstatus"
+													>
 														<option value=""></option>
 														<option value="pending">Pending</option>
 														<option value="paid">Paid</option>
@@ -74,99 +86,126 @@
 								</div>
 							</div>
 							<div class="row">
-								<div class="col-lg-12">									
-									<div class="table-responsive-sm" id="results">
+								<div class="col-lg-12" id="results">									
+									<div class="table-responsive-sm">
 										<table class="table table-striped projects">
 											<thead class="thead-dark">
 												<tr>
-												<th scope="col">No</th>
-												<th scope="col">Invoice No</th>
-												<th scope="col">Client Name</th>
-												<th scope="col">Client email</th>
-												<th scope="col">Create date</th>
-												<th scope="col">Due date</th>
-												<th scope="col">Amount</th>
-												<th scope="col">Status</th>
-												<th scope="col">Resend Email</th>	
+													<th scope="col">No</th>
+													<th scope="col">Invoice No</th>
+													<th scope="col">Client Name</th>
+													<th scope="col">Client email</th>
+													<th scope="col">Create date</th>
+													<th scope="col">Due date</th>
+													<th scope="col">Amount</th>
+													<th scope="col">Status</th>
+													<th scope="col">Resend Email</th>	
 												</tr>
 											</thead>
 											<tbody>
 												{% for x in alltransaction %}
-												<tr>
-												<th scope="row">{{x.transactionid}}</th>
-												<td>{{x.invoiceno}}</td>
-												<td>{{x.accountid.accountname}}</td>
-												<td>{{x.accountid.accountemailid}}</td>
-												<td>{{x.transactioncreatedate}}</td>
-												<td>{{x.transactionduedate}}</td>
-												<td>₹{{x.transactionamount}}</td>
-												<td>
-													{% if x.transactionstatus == 'paid' %}
-													<span class="badge bg-success">Paid</span>
-													{% elif x.transactionstatus == 'failed' %}
-													<span class="badge bg-danger">Failed</span>
-													{% else %}
-													<span class="badge bg-warning">Pending</span>
-													{% endif %}
-												</td>
-												<td>
-													{% if x.transactionid and x.transactioncreatedate != now and x.transactionstatus != "paid" %}
-													<a href="{% url 'resend_email' x.transactionid %}" class="btn btn-primary">
-														Resend Email
-													</a>
-													{% endif %}
-												</td>
-												</tr>
+													<tr>
+														<th scope="row">{{ x.transactionid }}</th>
+														<td>{{ x.invoiceno }}</td>
+														<td>{{ x.accountid.accountname }}</td>
+														<td>{{ x.accountid.accountemailid }}</td>
+														<td>{{ x.transactioncreatedate }}</td>
+														<td>{{ x.transactionduedate }}</td>
+														<td>₹{{ x.transactionamount }}</td>
+														<td>
+															{% if x.transactionstatus == 'paid' %}
+																<span class="badge text-success">Paid</span>
+															{% elif x.transactionstatus == 'failed' %}
+																<span class="badge text-danger">Failed</span>
+															{% else %}
+																<span class="badge text-warning">Pending</span>
+															{% endif %}
+														</td>
+														<td>
+															{% if x.transactionid and x.transactioncreatedate != now and x.transactionstatus != "paid" %}
+																<a href="{% url 'resend_email' x.transactionid %}" class="btn login100-form-btnm">
+																	Resend Email
+																</a>
+															{% endif %}
+														</td>
+													</tr>
 												{% empty %}
-												<tr><td colspan="9">No transactions found.</td></tr>
+													<tr>
+														<td colspan="9">No transactions found.</td>
+													</tr>
 												{% endfor %}
 											</tbody>
 										</table>
 										<nav>
 											<ul class="pagination justify-content-center">												
 												{% if page_obj.has_previous %}
-												<li class="page-item">
-													<a class="page-link" href="?page=1{{ query_string }}">&laquo; First</a>
-												</li>
-												<li class="page-item">
-													<a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ query_string }}">Previous</a>
-												</li>
+													<li class="page-item">
+														<a
+															class="page-link page-nav-link"
+															href="?page=1{{ query_string }}"
+														>&laquo; First</a>
+													</li>
+													<li class="page-item">
+														<a
+															class="page-link page-nav-link"
+															href="?page={{ page_obj.previous_page_number }}{{ query_string }}"
+														>Previous</a>
+													</li>
 												{% else %}
-												<li class="page-item disabled"><span class="page-link">First</span></li>
-												<li class="page-item disabled"><span class="page-link">Previous</span></li>
+													<li class="page-item disabled">
+														<span class="page-link">First</span>
+													</li>
+													<li class="page-item disabled">
+														<span class="page-link">Previous</span>
+													</li>
 												{% endif %}
 
 												<li class="page-item disabled">
-												<span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+													<span class="page-link">
+														Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+													</span>
 												</li>
 
 												{% if page_obj.has_next %}
-												<li class="page-item">
-													<a class="page-link" href="?page={{ page_obj.next_page_number }}{{ query_string }}">Next</a>
-												</li>
-												<li class="page-item">
-													<a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{{ query_string }}">Last &raquo;</a>
-												</li>
+													<li class="page-item">
+														<a
+															class="page-link page-nav-link"
+															href="?page={{ page_obj.next_page_number }}{{ query_string }}"
+														>Next</a>
+													</li>
+													<li class="page-item">
+														<a
+															class="page-link page-nav-link"
+															href="?page={{ page_obj.paginator.num_pages }}{{ query_string }}"
+														>Last &raquo;</a>
+													</li>
 												{% else %}
-												<li class="page-item disabled"><span class="page-link">Next</span></li>
-												<li class="page-item disabled"><span class="page-link">Last</span></li>
+													<li class="page-item disabled">
+														<span class="page-link">Next</span>
+													</li>
+													<li class="page-item disabled">
+														<span class="page-link">Last</span>
+													</li>
 												{% endif %}
 											</ul>
 										</nav>
 									</div>
 								</div>
 							</div>
-						</div>
-					</div>
+						</div>  <!-- end price_table -->
+					</div>  <!-- end white_shd -->
 				</div>
-			</div>
-				<!-- end row -->			
+			</div>  <!-- end column1 -->
 		</div>
 	</div>                  
 	<!-- end dashboard inner -->
 {% endblock %}
+
+
 {% block extra_js %}
 <script>
+// ───────────────────────────────────────────────────────────────────────────
+// 1) date‐picker “×” button logic (unchanged)
 $(document).ready(function() {
     const $input = $('#inputduedate');
     const $clear = $('.clear-date');
@@ -180,11 +219,11 @@ $(document).ready(function() {
         }
     });
 
-    // Clear input when clicking the "x"
+    // Clear input when clicking the "×"
     $clear.on('click', function() {
         $input.val('');
         $clear.hide();
-        $input.trigger('change');  // trigger change if needed to update search or UI
+        $input.trigger('change');  // so the filter AJAX will run
     });
 
     // Initially check on page load
@@ -192,38 +231,87 @@ $(document).ready(function() {
         $clear.show();
     }
 });
+
+// 2) initialize select2 on your two <select> fields
 $(function(){
-	$('#searchbyname').select2({
-		placeholder: 'Search by name',
-		allowClear: true
-	});
+    $('#searchbyname').select2({
+        placeholder: 'Search by name',
+        allowClear: true
+    });
 
-	$('#transactionstatus').select2({
-		placeholder: 'Search by status',
-		allowClear: true
-	});
+    $('#transactionstatus').select2({
+        placeholder: 'Search by status',
+        allowClear: true
+    });
+});
 
-	$('#search-form').on('change', function(e) {
-		e.preventDefault();
+// ───────────────────────────────────────────────────────────────────────────
+// 3) CORE AJAX logic (filters + pagination)
+$(function(){
+    // Helper: gather all three filter values into an object
+    function getFilterData() {
+        return {
+            accountname: $('#searchbyname').val() || "",
+            transactionstatus: $('#transactionstatus').val() || "",
+            // We read the date value into “transactionduedate” because your view expects that key
+            transactionduedate: $('#inputduedate').val() || ""
+        };
+    }
 
-		const data = {
-			accountname:    $('#searchbyname').val(),
-			transactionstatus: $("#transactionstatus").val(),
-			transactionduedate: $('#inputduedate').val()
-		};
+    // The central AJAX function. If `url` is undefined, we fetch page 1.
+    function fetchResults(url) {
+        // default to your “search_transaction” endpoint
+        if (!url) {
+            url = "{% url 'search_transaction' %}";
+        }
 
-		$.ajax({
-			url: "{% url 'search_transaction' %}",
-			data: data,
-			headers: { 'X-Requested-With': 'XMLHttpRequest' },
-			success: function(html) {
-				// pull only the updated rows out of the full template
-				const result = $(html).find('#results').html();
-				$('#results').html(result);
-			}
-		});
-	});
+        // Extract “page=…” from the passed‐in url (if any)
+        let pageParam = "";
+        if (url.indexOf('?') !== -1) {
+            const paramsObj = new URLSearchParams(url.split('?')[1]);
+            if (paramsObj.has('page')) {
+                pageParam = paramsObj.get('page');
+            }
+        }
 
+        // Build our final data payload:
+        //   • Always send the three filters
+        //   • If pageParam is set, also send page=pageParam
+        const data = getFilterData();
+        if (pageParam) {
+            data.page = pageParam;
+        }
+
+        $.ajax({
+            url: "{% url 'search_transaction' %}",
+            data: data,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            method: 'GET',
+            success: function(response) {
+                // We assume your view returns a FULL HTML page.
+                // So we find the inner #results from that new HTML and overwrite the local #results.
+                const newResults = $('<div>').html(response).find('#results').html();
+                $('#results').html(newResults);
+            }
+        });
+    }
+
+    // 3a) WHEN ANY FILTER CHANGES (select2 or date), fetch page-1 of results
+    $('#search-form').on('change', function(e) {
+        e.preventDefault();
+        fetchResults();  // no URL → default to page 1
+    });
+
+    // 3b) DELEGATED CLICK: any <a> inside .pagination in #results
+    $('#results').on('click', '.page-nav-link', function(e) {
+        e.preventDefault();
+        const href = $(this).attr('href');  // e.g. "?page=2&accountname=Acme"
+        fetchResults(href);
+    });
+
+    // (Optional) If you want the table to load via AJAX immediately on first page load,
+    // uncomment the next line. Otherwise, Django’s initial render will show page 1.
+    // fetchResults();
 
 });
 </script>
