@@ -22,6 +22,7 @@ from django_countries import countries
 from django.utils.dateparse import parse_date
 from django.urls import reverse
 from datetime import date, timedelta
+from django.core.paginator import Paginator
 
 # Create your views here.
 print(certifi.where())
@@ -123,13 +124,15 @@ def singup(req):
                 return render(req,"regester.html",context)
 
 def dashboard(req):
-    alltransaction=Transaction.objects.all().select_related('accountid')
+    alltransaction=Transaction.objects.all().order_by('-invoiceno').select_related('accountid')
     allaccounts = Accountsc.objects.all() 
     now = timezone.now()   
-    print(alltransaction)
-    print(req.user)
     username = req.user
-    return render(req, "home.html",{"username": username,"alltransaction":alltransaction,"allaccounts":allaccounts,"now": now})
+    paginator = Paginator(alltransaction, 10)  # Show 10 per page
+    page_number = req.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    print(page_obj)
+    return render(req, "home.html",{"username": username,"alltransaction":page_obj,"allaccounts":allaccounts,"now": now,'page_obj': page_obj })
 
 def editprofile(req,profileid):
     profile=get_object_or_404(UserProfile,id=profileid)
@@ -386,30 +389,45 @@ def search_transaction(request):
     name = request.GET.get('accountname')
     duedate = request.GET.get('transactionduedate')
     status = request.GET.get('transactionstatus')
+
     alltransaction = Transaction.objects.select_related('accountid').all()
-    print(status)
 
     if name:
         alltransaction = alltransaction.filter(accountid__accountname__iexact=name)
-   
     if duedate:
-         alltransaction = alltransaction.filter(transactionduedate=duedate) if duedate else alltransaction
-    
+        alltransaction = alltransaction.filter(transactionduedate=duedate)
     if status:
-         alltransaction = alltransaction.filter(transactionstatus=status) if status else alltransaction
+        alltransaction = alltransaction.filter(transactionstatus=status)
+
+    # Add pagination here
+    paginator = Paginator(alltransaction.order_by('-invoiceno'), 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # Build query string for pagination links
+    filter_params = {
+        "accountname": name,
+        "transactionduedate": duedate,
+        "transactionstatus": status,
+    }
+    query_string = "&" + "&".join(
+        f"{key}={val}"
+        for key, val in filter_params.items()
+        if val
+    )
 
     context = {
-        'alltransaction': alltransaction,            # For displaying
+        'alltransaction': page_obj,
+        'page_obj': page_obj,
+        'query_string': query_string,
         'ajax': request.headers.get('x-requested-with') == 'XMLHttpRequest',
     }
 
     if context['ajax']:
-        # Return partial HTML (only results section)
-        html = render_to_string('Home.html', context, request=request)
+        html = render_to_string('home.html', context, request=request)
         return HttpResponse(html)
 
-    # Full page load
-    return render(request, 'Home.html', context)
+    return render(request, 'home.html', context)
 
 def accountdetail(req,accountid):
     accounts=Accountsc.objects.get(accountid=accountid)

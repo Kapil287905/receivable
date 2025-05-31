@@ -20,12 +20,13 @@
 							<h2>Transaction</h2>
 							</div>
 						</div>
-						<div class="full price_table padding_infor_info">
+						<div class="full price_table padding_infor_info" style="padding: 15px 35px 35px 35px;">
 							<div class="row">
 								<div class="col-lg-12 mb-2">
 									<form id="search-form">
 										<div class="row">
 											<div class="col-md-3">
+												<small>&nbsp;</small>
 												<div class="wrap-input100 validate-input">
 													<select class="js-example-placeholder-single" id="searchbyname">
 														<option value=""></option>
@@ -36,11 +37,12 @@
 												</div>
 											</div>
 											<div class="col-md-3">
+												<small style="padding: 0px 20px;">Due Date</small>
 												<div class="wrap-input100 validate-input">
-													<input type="date" class="input100" id="inputduedate" name="duedate" placeholder="MM/YY" required>
+													<input type="date" class="input100" id="inputduedate" name="duedate">													
 													<span class="focus-input100"></span>
 													<span class="symbol-input100">
-														<i class="fa fa-envelope" aria-hidden="true"></i>
+														<i class="fa fa-calendar" aria-hidden="true"></i>
 													</span>
 													<span class="clear-date" style="
 														display: none;
@@ -57,6 +59,7 @@
 												</div>
 											</div>
 											<div class="col-md-3">
+												<small>&nbsp;</small>
 												<div class="wrap-input100 validate-input">
 													<select class="js-example-placeholder-single" name="transactionstatus" id="transactionstatus">
 														<option value=""></option>
@@ -72,8 +75,8 @@
 							</div>
 							<div class="row">
 								<div class="col-lg-12">									
-									<div class="table-responsive-sm">
-										<table class="table table-striped projects" id="results">
+									<div class="table-responsive-sm" id="results">
+										<table class="table table-striped projects">
 											<thead class="thead-dark">
 												<tr>
 												<th scope="col">No</th>
@@ -114,9 +117,42 @@
 													{% endif %}
 												</td>
 												</tr>
+												{% empty %}
+												<tr><td colspan="9">No transactions found.</td></tr>
 												{% endfor %}
 											</tbody>
 										</table>
+										<nav>
+											<ul class="pagination justify-content-center">												
+												{% if page_obj.has_previous %}
+												<li class="page-item">
+													<a class="page-link" href="?page=1{{ query_string }}">&laquo; First</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ query_string }}">Previous</a>
+												</li>
+												{% else %}
+												<li class="page-item disabled"><span class="page-link">First</span></li>
+												<li class="page-item disabled"><span class="page-link">Previous</span></li>
+												{% endif %}
+
+												<li class="page-item disabled">
+												<span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+												</li>
+
+												{% if page_obj.has_next %}
+												<li class="page-item">
+													<a class="page-link" href="?page={{ page_obj.next_page_number }}{{ query_string }}">Next</a>
+												</li>
+												<li class="page-item">
+													<a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{{ query_string }}">Last &raquo;</a>
+												</li>
+												{% else %}
+												<li class="page-item disabled"><span class="page-link">Next</span></li>
+												<li class="page-item disabled"><span class="page-link">Last</span></li>
+												{% endif %}
+											</ul>
+										</nav>
 									</div>
 								</div>
 							</div>
