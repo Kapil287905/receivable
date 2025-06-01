@@ -18,7 +18,7 @@
 				<div class="white_shd full margin_bottom_30">
 					<div class="full graph_head">
 						<div class="heading1 margin_0">
-							<h2>{{accounts.accountname}}</h2>
+							<h2>{{ accounts.accountname|title }}</h2>
 						</div>
 					</div>
 					<div class="full price_table padding_infor_info">
@@ -42,8 +42,8 @@
 				</div>
 			</div>
 			<div class="mt-3">
-                <a href="{% url 'editaccount'  accounts.accountid %}" class="btn btn-primary">Edit account</a>
-                <a href="{% url 'deleteaccount'  accounts.accountid  %}" class="btn btn-danger">Delete account</a>
+                <a href="{% url 'editaccount'  accounts.accountid %}" class="btn btn-success" style="border-radius: 25px;text-transform: uppercase;padding: 0 25px;height: 50px;line-height: 3.5;">Edit account</a>
+                <a href="{% url 'deleteaccount'  accounts.accountid  %}" class="btn btn-danger" style="border-radius: 25px;text-transform: uppercase;padding: 0 25px;height: 50px;line-height: 3.5;">Delete account</a>
             </div>
 			<div class="col-md-2"></div>
 		</div>

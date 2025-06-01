@@ -12,7 +12,7 @@
 				</div>
 				<div class="col-md-6 text-right">
 					<div class="page_title">
-						<h2><a href="{% url 'account' %}"><i class="fa fa-users red_color"></i> <span>Create Account</span></a></h2>
+						<h2><a href="{% url 'account' %}"><i class="fa fa-users blue_color"></i> <span>Create Account</span></a></h2>
 					</div>
 				</div>
 			</div>
@@ -62,7 +62,7 @@
 					<div class="white_shd full margin_bottom_30" style="padding: 10px;">
 					<h5 class="card-title">{{ x.accountname }}</h5>
 					<p class="card-text">{{ x.accountemailid }}</p>
-					<a href="{% url 'accountdetail' x.accountid %}" class="btn btn-primary">View More</a>
+					<a href="{% url 'accountdetail' x.accountid %}" class="btn login100-form-btnm">View More</a>
 					</div>
 				</div>
 				{% empty %}
@@ -103,7 +103,7 @@ $(document).ready(function() {
 });
 $(function(){
 	$('#searchbyname').select2({
-		placeholder: 'Search by name',
+		placeholder: 'Search By Name',
 		allowClear: true
 	});
 

@@ -2496,10 +2496,11 @@ input[type=file]::file-selector-button {
     border: none;
     background: #ff5722;
     padding: 10px 20px;
-    border-radius: 10px;
+    border-radius: 25px;
     color: #fff;
     cursor: pointer;
     transition: background .2s ease-in-out;
+    text-transform: uppercase;
   }
   
   input[type=file]::file-selector-button:hover {
