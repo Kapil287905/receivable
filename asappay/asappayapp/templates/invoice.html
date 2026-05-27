@@ -105,6 +105,7 @@
                     })
                     .then(res => res.json())
                     .then(data => {
+                        alert(data.status)
                         if (data.status === "success") {
                             window.location.href = "/payment_success/" + data.transaction_id + "/";
                         } else {
